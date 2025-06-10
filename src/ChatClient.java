@@ -1,65 +1,59 @@
 import java.io.*;
 import java.net.*;
+import java.util.function.Consumer;
 
 /**
- * A simple chat client that connects to a chat server using TCP/IP sockets.
- * The client can send messages to the server and receive responses.
+ * A client implementation for a chat application using TCP/IP sockets.
  */
 public class ChatClient {
     // Socket for network communication
-    private Socket socket = null;
-    // Reader for console input
-    private BufferedReader inputConsole = null;
-    // Writer to send messages to server
-    private PrintWriter out = null;
-    // Reader to receive messages from server
-    private BufferedReader in = null;
+    private Socket socket;
+    // Reader for incoming messages from the server
+    private BufferedReader in;
+    // Writer for sending messages to the server
+    private PrintWriter out;
+    // Callback function to handle received messages
+    private Consumer<String> onMessageReceived;
 
     /**
-     * Constructor that initializes the chat client and handles the main communication loop
-     * @param address The server's IP address
-     * @param port The server's port number
-     * @throws IOException If there's an error with the network communication
+     * Initializes a new chat client.
+     * 
+     * @param serverAddress    The IP address or hostname of the server
+     * @param serverPort      The port number the server is listening on
+     * @param onMessageReceived Callback function to handle incoming messages
+     * @throws IOException    If connection to the server fails
      */
-    public ChatClient(String address, int port) throws IOException {
-        try {
-            // Establish connection to the server
-            socket = new Socket(address, port);
-            System.out.println("Connected to the chat server");
-
-            // Initialize I/O streams
-            inputConsole = new BufferedReader(new InputStreamReader(System.in));
-            out = new PrintWriter(socket.getOutputStream(), true);
-            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
-            // Main communication loop
-            String line = "";
-            while (!line.equals("exit")) {
-                // Read input from console
-                line = inputConsole.readLine();
-                // Send message to server
-                out.println(line);
-                // Print server's response
-                System.out.println(in.readLine());
-            }
-
-            // Clean up resources
-            socket.close();
-            inputConsole.close();
-            out.close();
-        } catch (UnknownHostException e) {
-            System.out.println("Host unknown: " + e.getMessage());
-        }  catch (IOException e) {
-            System.out.println("I/O Error: " + e.getMessage());
-        }
+    public ChatClient(String serverAddress, int serverPort, Consumer<String> onMessageReceived) throws IOException {
+        this.socket = new Socket(serverAddress, serverPort);
+        this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        this.out = new PrintWriter(socket.getOutputStream(), true);
+        this.onMessageReceived = onMessageReceived;
     }
 
     /**
-     * Main method to start the chat client
-     * @param args Command line arguments (not used)
-     * @throws IOException If there's an error initializing the client
+     * Sends a message to the server.
+     * 
+     * @param msg The message to be sent
      */
-    public static void main(String[] args) throws IOException {
-        ChatClient chatClient = new ChatClient("127.0.0.1", 5000);
+    public void sendMessage(String msg) {
+        out.println(msg);
+    }
+
+    /**
+     * Starts a background thread that continuously listens for incoming messages.
+     * When a message is received, it is passed to the onMessageReceived callback.
+     */
+    public void startClient() {
+        new Thread(() -> {
+            try {
+                String line;
+                // Keep reading messages until the connection is closed
+                while ((line = in.readLine()) != null) {
+                    onMessageReceived.accept(line);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 }
