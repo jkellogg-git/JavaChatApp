@@ -14,10 +14,19 @@ public class ChatServer {
     private static List<ClientHandler> clients = new ArrayList<>();
 
     public static void main(String[] args) throws IOException {
-        String ipAddress = ChatUtils.getLocalIPAddress();
-        ServerSocket serverSocket = new ServerSocket(5000, 0, InetAddress.getByName(ipAddress));
-        System.out.println("Server started on " + ipAddress + ":" + 5000);
-        System.out.println("Server started. Waiting for clients");
+        // Remove binding to specific IP and use 0.0.0.0 to listen on all interfaces
+        ServerSocket serverSocket = new ServerSocket(5000);
+        System.out.println("Server started on port 5000");
+        System.out.println("Server IP addresses:");
+        // Print all server IP addresses for convenience
+        NetworkInterface.getNetworkInterfaces().asIterator().forEachRemaining(networkInterface -> {
+            networkInterface.getInetAddresses().asIterator().forEachRemaining(address -> {
+                if (!address.isLoopbackAddress() && !address.isLinkLocalAddress() && !address.isMulticastAddress()) {
+                    System.out.println("  " + address.getHostAddress());
+                }
+            });
+        });
+        System.out.println("Waiting for clients...");
 
         while (true) {
             Socket clientSocket = serverSocket.accept();
