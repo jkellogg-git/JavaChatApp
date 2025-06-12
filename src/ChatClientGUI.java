@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -22,6 +23,8 @@ public class ChatClientGUI extends JFrame {
         super("Chat Application");
         setSize(400, 500);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
+
+        String ipAddress = ChatUtils.getLocalIPAddress();
 
         // Initialize the message display area
         messageArea = new JTextArea();
@@ -69,7 +72,7 @@ public class ChatClientGUI extends JFrame {
 
         try {
             // Initialize chat client with localhost connection
-            this.client = new ChatClient("127.0.0.1", 5000, this::onMessageReceived);
+            this.client = new ChatClient(InetAddress.getByName(ipAddress), 5000, this::onMessageReceived);
             client.startClient();
         } catch (IOException e) {
             e.printStackTrace();

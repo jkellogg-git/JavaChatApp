@@ -23,7 +23,7 @@ public class ChatClient {
      * @param onMessageReceived Callback function to handle incoming messages
      * @throws IOException    If connection to the server fails
      */
-    public ChatClient(String serverAddress, int serverPort, Consumer<String> onMessageReceived) throws IOException {
+    public ChatClient(InetAddress serverAddress, int serverPort, Consumer<String> onMessageReceived) throws IOException {
         this.socket = new Socket(serverAddress, serverPort);
         this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         this.out = new PrintWriter(socket.getOutputStream(), true);
