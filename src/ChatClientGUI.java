@@ -2,6 +2,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * A GUI client application for a chat system using Swing components.
@@ -12,7 +14,7 @@ public class ChatClientGUI extends JFrame {
     private JTextArea messageArea;    // Area to display chat messages
     private JTextField textField;      // Input field for new messages
     private ChatClient client;         // Handles network communication
-
+    private JButton exitButton;
     /**
      * Constructor: Initializes the chat window and establishes connection to the server
      */
@@ -28,18 +30,42 @@ public class ChatClientGUI extends JFrame {
         // Add scrollable message area in the center
         add(new JScrollPane(messageArea), BorderLayout.CENTER);
 
+        // Prompt user for name
+        String name = JOptionPane.showInputDialog(this, "Enter your name", "Name", JOptionPane.PLAIN_MESSAGE);
+        this.setTitle("Chat Application - " + name);
         // Initialize and configure the input text field
         textField = new JTextField();
         // Add listener to handle message sending when Enter is pressed
         textField.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                client.sendMessage(textField.getText());
+                String message = "[" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "] " + name + ": "
+                        + textField.getText();
+                client.sendMessage(message);
                 textField.setText("");  // Clear the input field after sending
             }
         });
         // Add the text field at the bottom of the window
         add(textField, BorderLayout.SOUTH);
+
+        // Initialize exit button
+        exitButton = new JButton("Exit");
+        exitButton.addActionListener(e ->
+                {
+                    String depatureMessage = name + " has left the chat.";
+                    client.sendMessage(depatureMessage);
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException ex) {
+                        Thread.currentThread().interrupt();
+                    }
+                    System.exit(0);
+                }
+        );
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel.add(textField, BorderLayout.CENTER);
+        bottomPanel.add(exitButton, BorderLayout.EAST);
+        add(bottomPanel, BorderLayout.SOUTH);
 
         try {
             // Initialize chat client with localhost connection
