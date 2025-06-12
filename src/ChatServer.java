@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.net.InetAddress;
 
 /**
  * A simple multi-client chat server that accepts connections on port 5000.
@@ -13,8 +14,9 @@ public class ChatServer {
     private static List<ClientHandler> clients = new ArrayList<>();
 
     public static void main(String[] args) throws IOException {
-        // Create a server socket that listens on port 5000
-        ServerSocket serverSocket = new ServerSocket(5000);
+        String ipAddress = ChatUtils.getLocalIPAddress();
+        ServerSocket serverSocket = new ServerSocket(5000, 0, InetAddress.getByName(ipAddress));
+        System.out.println("Server started on " + ipAddress + ":" + 5000);
         System.out.println("Server started. Waiting for clients");
 
         while (true) {
