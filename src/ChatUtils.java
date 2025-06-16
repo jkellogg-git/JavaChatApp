@@ -1,9 +1,28 @@
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Enumeration;
 
 public final class ChatUtils {
+
+    public enum ServerOption {
+        HOST,
+        JOIN
+    }
+
+    public enum MessageSenderInfo {
+        SYSTEM("[" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "] System: "),
+        USER ("[" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "] ");
+
+        private final String message;
+        MessageSenderInfo(String s) {
+            this.message = s;
+        }
+
+        public String messagePrefix() {return message;}
+    }
 
     public static String getLocalIPAddress() {
         try {
