@@ -19,23 +19,25 @@ public class ChatClientGUI extends JFrame {
     /**
      * Constructor: Initializes the chat window and establishes connection to the server
      */
-    public ChatClientGUI() {
-        super("Chat Application");
-        setSize(400, 500);
+    public ChatClientGUI(String ipAddress, String name, ChatUtils.ServerOption serverOption) {
+        super("Chat Application - " + name);
+        setSize(600, 500);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-
-        String ipAddress = ChatUtils.getLocalIPAddress();
-
         // Initialize the message display area
         messageArea = new JTextArea();
         messageArea.setEditable(false);  // Make it read-only
-
         // Add scrollable message area in the center
         add(new JScrollPane(messageArea), BorderLayout.CENTER);
 
-        // Prompt user for name
-        String name = JOptionPane.showInputDialog(this, "Enter your name", "Name", JOptionPane.PLAIN_MESSAGE);
-        this.setTitle("Chat Application - " + name);
+        // Provide welcome message based on ServerOption selected
+        String welcomeMessageHost = "Welcome to the chat! You are hosting. Share your IP Address to other users: "
+                + ipAddress + "\n";
+        String welcomeMessageJoin = "Welcome to the chat! You joined server: " + ipAddress + "\n";
+        switch (serverOption) {
+            case HOST -> messageArea.append(ChatUtils.MessageSenderInfo.SYSTEM.messagePrefix() + welcomeMessageHost);
+            case JOIN -> messageArea.append(ChatUtils.MessageSenderInfo.USER.messagePrefix() + welcomeMessageJoin);
+        }
+
         // Initialize and configure the input text field
         textField = new JTextField();
         // Add listener to handle message sending when Enter is pressed
@@ -98,7 +100,7 @@ public class ChatClientGUI extends JFrame {
      */
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            new ChatClientGUI().setVisible(true);
+            new StartScreen().setVisible(true);
         });
     }
 }
