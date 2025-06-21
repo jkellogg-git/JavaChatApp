@@ -23,9 +23,9 @@ class CustomTitleBar extends JPanel {
         buttonPanel.setBackground(Color.BLACK);
 
         // Create window buttons
-        JButton minimizeButton = createButton("Min");
-        JButton maximizeButton = createButton("Max");
-        JButton closeButton = createButton("Exit");
+        JButton minimizeButton = createButton("-");
+        JButton maximizeButton = createButton("+");
+        JButton closeButton = createButton("x");
 
         buttonPanel.add(minimizeButton);
         buttonPanel.add(maximizeButton);
