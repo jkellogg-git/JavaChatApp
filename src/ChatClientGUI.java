@@ -3,8 +3,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 /**
  * A GUI client application for a chat system using Swing components.
@@ -16,18 +14,62 @@ public class ChatClientGUI extends JFrame {
     private JTextField textField;      // Input field for new messages
     private ChatClient client;         // Handles network communication
     private JButton exitButton;
+    // Add CustomTitleBar as a field
+    private CustomTitleBar titleBar;
+    
     /**
      * Constructor: Initializes the chat window and establishes connection to the server
      */
     public ChatClientGUI(String ipAddress, String name, ChatUtils.ServerOption serverOption) {
         super("Chat Application - " + name);
-        setSize(600, 500);
+        setSize(800, 600);
+        setUndecorated(true);
+        
+        // Create main content panel
+        JPanel contentPanel = new JPanel(new BorderLayout());
+        
+        // Initialize and add the custom title bar
+        titleBar = new CustomTitleBar(this, name);
+        contentPanel.add(titleBar, BorderLayout.NORTH);
+        
+        // Create the gradient panel (your existing code)
+        JPanel gradientPanel = new JPanel(new BorderLayout()) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
+                int width = getWidth();
+                int height = getHeight();
+                Color color1 = new Color(0, 102, 204);  // Blue
+                Color color2 = new Color(102, 0, 204);  // Purple
+                GradientPaint gp = new GradientPaint(0, 0, color1, width, height, color2);
+                g2d.setPaint(gp);
+                g2d.fillRect(0, 0, width, height);
+            }
+        };
+        gradientPanel.setOpaque(false);
+        
+        // Add the gradient panel to the content panel
+        contentPanel.add(gradientPanel, BorderLayout.CENTER);
+        
+        // Set the content pane to our new panel
+        setContentPane(contentPanel);
+
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         // Initialize the message display area
         messageArea = new JTextArea();
         messageArea.setEditable(false);  // Make it read-only
-        // Add scrollable message area in the center
-        add(new JScrollPane(messageArea), BorderLayout.CENTER);
+
+        // Style the message area
+        messageArea.setBackground(new Color(0, 0, 0));  // Black background
+        messageArea.setForeground(new Color(0, 255, 0));  // Electric green text
+        messageArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
+        messageArea.setCaretColor(new Color(0, 255, 0));
+
+        // Create a styled scroll pane
+        JScrollPane scrollPane = new JScrollPane(messageArea);
+        scrollPane.getViewport().setBackground(new Color(0, 0, 0));
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
 
         // Provide welcome message based on ServerOption selected
         String welcomeMessageHost = "Welcome to the chat! You are hosting. Share your IP Address to other users: "
@@ -44,14 +86,67 @@ public class ChatClientGUI extends JFrame {
         textField.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String message = "[" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "] " + name + ": "
+                String message = ChatUtils.MessageSenderInfo.USER.messagePrefix() + name + ": "
                         + textField.getText();
                 client.sendMessage(message);
                 textField.setText("");  // Clear the input field after sending
             }
         });
-        // Add the text field at the bottom of the window
-        add(textField, BorderLayout.SOUTH);
+
+        // Style the text field
+        textField.setBackground(new Color(0, 0, 0));
+        textField.setForeground(new Color(0, 255, 0));
+        textField.setCaretColor(new Color(0, 255, 0));
+        textField.setFont(new Font("Monospaced", Font.PLAIN, 12));
+        textField.setOpaque(true);
+
+        // Add placeholder using FocusListener
+        textField.setText("Type your message...");
+        textField.setForeground(new Color(0, 255, 0));  // Initial color for placeholder
+
+        textField.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (textField.getText().equals("Type your message...")) {
+                    textField.setText("");
+                    textField.setForeground(new Color(0, 255, 0));  // Bright green when typing
+                }
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (textField.getText().isEmpty()) {
+                    textField.setText("Type your message...");
+                    textField.setForeground(new Color(0, 255, 0));  // White for placeholder
+                }
+            }
+        });
+
+        // Create a line border with the electric green color
+        textField.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(0, 255, 0)),  // Outer border in green
+            BorderFactory.createEmptyBorder(0, 10, 0, 0)  // Inner padding (top, left, bottom, right)
+        ));
+
+        // Initialize sendMessage button
+        JButton sendMessageButton = new JButton("Send");
+        sendMessageButton.addActionListener(e -> {
+            String message = ChatUtils.MessageSenderInfo.USER.messagePrefix() + name + ": "
+                    + textField.getText();
+            client.sendMessage(message);
+            textField.setText("");
+        });
+
+        sendMessageButton.setBackground(new Color(0, 0, 0));
+        sendMessageButton.setForeground(new Color(0, 255, 0));
+        sendMessageButton.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(0, 255, 0), 1),
+                BorderFactory.createEmptyBorder(5, 10, 5, 10)
+        ));
+
+        sendMessageButton.setFocusPainted(false);
+        sendMessageButton.setOpaque(true);
+
 
         // Initialize exit button
         exitButton = new JButton("Exit");
@@ -67,10 +162,28 @@ public class ChatClientGUI extends JFrame {
                     System.exit(0);
                 }
         );
+
+        // Style the exit button
+        exitButton.setBackground(new Color(0, 0, 0));
+        exitButton.setForeground(new Color(0, 255, 0));
+        exitButton.setFocusPainted(false);
+        exitButton.setBorderPainted(false);
+        exitButton.setOpaque(true);
+
+        // Style the bottom panel
         JPanel bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel.setBackground(new Color(0, 0, 0));  // Set background for bottom panel
         bottomPanel.add(textField, BorderLayout.CENTER);
         bottomPanel.add(exitButton, BorderLayout.EAST);
-        add(bottomPanel, BorderLayout.SOUTH);
+        bottomPanel.add(sendMessageButton, BorderLayout.EAST);
+
+        gradientPanel.add(scrollPane, BorderLayout.CENTER);
+        gradientPanel.add(bottomPanel, BorderLayout.SOUTH);
+        
+        // Add a green border to the main window
+        getRootPane().setBorder(BorderFactory.createLineBorder(new Color(0, 255, 0), 2));
+        
+        // The rest of your existing constructor code remains the same...
 
         try {
             // Initialize chat client with localhost connection
@@ -93,6 +206,11 @@ public class ChatClientGUI extends JFrame {
     private void onMessageReceived(String message) {
         SwingUtilities.invokeLater(() -> messageArea.append(message + "\n"));
     }
+
+    public JButton getExitButton() {
+        return exitButton;
+    }
+
 
     /**
      * Main method to start the application
