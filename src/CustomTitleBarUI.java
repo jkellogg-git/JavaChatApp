@@ -5,11 +5,9 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 
 class CustomTitleBar extends JPanel {
-    private JFrame frame;
     private Point initialClick;
 
     public CustomTitleBar(JFrame frame, String name) {
-        this.frame = frame;
         setLayout(new BorderLayout());
         setBackground(Color.BLACK);
         setPreferredSize(new Dimension(frame.getWidth(), 30));

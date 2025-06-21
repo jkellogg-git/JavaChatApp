@@ -10,13 +10,11 @@ import java.net.InetAddress;
  */
 public class ChatClientGUI extends JFrame {
     // GUI Components
-    private JTextArea messageArea;    // Area to display chat messages
-    private JTextField textField;      // Input field for new messages
+    private final JTextArea messageArea;    // Area to display chat messages
+    private final JTextField textField;      // Input field for new messages
     private ChatClient client;         // Handles network communication
-    private JButton exitButton;
-    // Add CustomTitleBar as a field
-    private CustomTitleBar titleBar;
-    
+    private final JButton exitButton;
+
     /**
      * Constructor: Initializes the chat window and establishes connection to the server
      */
@@ -29,7 +27,8 @@ public class ChatClientGUI extends JFrame {
         JPanel contentPanel = new JPanel(new BorderLayout());
         
         // Initialize and add the custom title bar
-        titleBar = new CustomTitleBar(this, name);
+        // Add CustomTitleBar as a field
+        CustomTitleBar titleBar = new CustomTitleBar(this, name);
         contentPanel.add(titleBar, BorderLayout.NORTH);
         
         // Create the gradient panel (your existing code)
@@ -83,14 +82,11 @@ public class ChatClientGUI extends JFrame {
         // Initialize and configure the input text field
         textField = new JTextField();
         // Add listener to handle message sending when Enter is pressed
-        textField.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String message = ChatUtils.MessageSenderInfo.USER.messagePrefix() + name + ": "
-                        + textField.getText();
-                client.sendMessage(message);
-                textField.setText("");  // Clear the input field after sending
-            }
+        textField.addActionListener(e -> {
+            String message = ChatUtils.MessageSenderInfo.USER.messagePrefix() + name + ": "
+                    + textField.getText();
+            client.sendMessage(message);
+            textField.setText("");  // Clear the input field after sending
         });
 
         // Style the text field
@@ -217,8 +213,6 @@ public class ChatClientGUI extends JFrame {
      * Creates and shows the GUI on the Event Dispatch Thread
      */
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            new StartScreen().setVisible(true);
-        });
+        SwingUtilities.invokeLater(() -> new StartScreen().setVisible(true));
     }
 }
